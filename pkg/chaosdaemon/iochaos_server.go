@@ -30,7 +30,10 @@ import (
 const (
 	todaBin = "/usr/local/bin/toda"
 )
-
+/*
+	ApplyIoChaos创建了一个background process，运行一个叫做toda的程序，来完成pod iochaos
+	toda用rust编写，代码地址：https://github.com/chaos-mesh/toda
+ */
 func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequest) (*pb.ApplyIoChaosResponse, error) {
 	log.Info("applying io chaos", "Request", in)
 

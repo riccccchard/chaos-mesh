@@ -1,0 +1,16 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: GolangChaos
+metadata:
+    name: golang-error-example
+    namespace: chaos-testing
+spec:
+    #action为枚举类型，选择可以参考config/bases/chaos-mesh.org_golangchaos.yaml
+    action: sql-query-error
+    mode: one
+    duration: "30s"
+    containerName: httpapp
+    selector:
+        labelSelectors:
+            app: httpapp
+    scheduler:
+        cron: "@every 2m"

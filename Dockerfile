@@ -32,5 +32,6 @@ WORKDIR /bin
 
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.4/toda-linux-amd64.tar.gz | tar -xz
 
+COPY . /usr/local/bin/
 COPY ./scripts /scripts
 COPY --from=go_build /src/bin /bin

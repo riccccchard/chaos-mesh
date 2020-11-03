@@ -614,9 +614,9 @@ install_chaos_mesh() {
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    local chaos_mesh_image="pingcap/chaos-mesh:${version}"
-    local chaos_daemon_image="pingcap/chaos-daemon:${version}"
-    local chaos_dashboard_image="pingcap/chaos-dashboard:${version}"
+    local chaos_mesh_image="localhost:5000/pingcap/chaos-mesh:${version}"
+    local chaos_daemon_image="localhost:5000/pingcap/chaos-daemon:${version}"
+    local chaos_dashboard_image="localhost:5000/pingcap/chaos-dashboard:${version}"
 
     if [ "$docker_mirror" == "true" ]; then
         azk8spull "${chaos_mesh_image}" || true
@@ -1101,7 +1101,7 @@ spec:
       hostPID: true
       containers:
         - name: chaos-daemon
-          image: pingcap/chaos-daemon:${VERSION_TAG}
+          image: localhost:5000/pingcap/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1166,7 +1166,7 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
         - name: chaos-dashboard
-          image: pingcap/chaos-dashboard:${VERSION_TAG}
+          image: localhost:5000/pingcap/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1227,7 +1227,7 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
-        image: pingcap/chaos-mesh:${VERSION_TAG}
+        image: localhost:5000/pingcap/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}
