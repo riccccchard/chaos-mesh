@@ -41,12 +41,13 @@ spec:
               - sql-query-error
               type: string
             containerName:
-              description: ContainerName indicates the name of the container. Needed
-                in SqlQueryErrorAction
-              type: string
+              description: ContainerNames表示需要hack的多个containers, 如果不指明，chaos mesh将会将pod中所有的containers(除了pause)注入异常
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action. It
-                is required when the action is `SqlQueryErrorAction`. A duration string
+                is required when the action is `SqlErrorAction`. A duration string
                 is a possibly signed sequence of decimal numbers, each with optional
                 fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
                 time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".

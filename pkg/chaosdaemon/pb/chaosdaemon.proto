@@ -47,7 +47,7 @@ message GolangErrorResponse{
 
 message GolangErrorAction{
   enum Action{
-      SqlQueryErrorAction = 0;
+      SqlErrorAction = 0;
   }
   Action action= 1;
 }
