@@ -7,8 +7,9 @@ spec:
     #action为枚举类型，选择可以参考config/bases/chaos-mesh.org_golangchaos.yaml
     action: sql-query-error
     mode: one
-    duration: "30s"
-    containerName: httpapp
+    duration: "10s"
+    containerNames:
+        - httpapp
     selector:
         labelSelectors:
             app: httpapp
