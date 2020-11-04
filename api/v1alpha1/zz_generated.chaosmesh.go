@@ -221,7 +221,7 @@ func (in *GolangChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {

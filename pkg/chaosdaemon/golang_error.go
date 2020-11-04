@@ -17,12 +17,13 @@ const(
 
 func getErrorType(action pb.GolangErrorAction_Action)int {
 	switch action {
-	case pb.GolangErrorAction_SqlQueryErrorAction:
+	case pb.GolangErrorAction_SqlErrorAction:
 		return 0
 	}
 	return -1
 }
 //设置golang异常
+//0 : 表示sql error action，将会调用delve_tool修改dababase/sql.(*DB)的所有函数的返回值
 func (s *daemonServer) SetGolangError(ctx context.Context, request *pb.GolangErrorRequest) (*pb.GolangErrorResponse, error) {
 	log.Info("trying to set golang error to target container , ", "containerID", request.ContainerId , "Action" , request.Action)
 

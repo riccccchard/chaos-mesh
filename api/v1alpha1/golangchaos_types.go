@@ -38,7 +38,7 @@ type GolangChaosAction string
 
 const (
 	//sql query error 表示将sql.(*DB).Query的error返回值设置为非nil
-	SqlQueryErrorAction GolangChaosAction = "sql-query-error"
+	SqlErrorAction GolangChaosAction = "sql-query-error"
 )
 
 // GolangChaosSpec defines the attributes that a user creates on a chaos experiment about golang inject.
@@ -69,7 +69,7 @@ type GolangChaosSpec struct {
 	Value string `json:"value"`
 
 	// Duration represents the duration of the chaos action.
-	// It is required when the action is `SqlQueryErrorAction`.
+	// It is required when the action is `SqlErrorAction`.
 	// A duration string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms", "-1.5h" or "2h45m".
@@ -77,10 +77,10 @@ type GolangChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
-	// ContainerName indicates the name of the container.
-	// Needed in SqlQueryErrorAction
+	// ContainerNames表示需要hack的多个containers,
+	// 如果不指明，chaos mesh将会将pod中所有的containers(除了pause)注入异常
 	// +optional
-	ContainerName string `json:"containerName"`
+	ContainerNames []string `json:"containerName,omitempty"`
 
 	// GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
 	// Value must be non-negative integer. The default value is zero that indicates delete immediately.

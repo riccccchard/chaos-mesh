@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y tzdata procps iptables ipset stress-ng 
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
-ADD https://github.com/riccccchard/delve_tool/releases/download/delve_tool-0.3.0/delve_tool /usr/local/bin/
+ADD https://github.com/riccccchard/delve_tool/releases/download/delve_tool-0.4.1/delve_tool /usr/local/bin/
 #防止权限不足
 RUN chmod 777 /usr/local/bin/delve_tool
 ENV RUST_BACKTRACE 1
