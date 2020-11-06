@@ -9,9 +9,9 @@ spec:
     mode: one
     duration: "10s"
     containerNames:
-        - httpapp
+        - httpxorm
     selector:
         labelSelectors:
-            app: httpapp
+            app: httpxorm
     scheduler:
         cron: "@every 2m"
