@@ -7,11 +7,11 @@ spec:
     #action为枚举类型，选择可以参考config/bases/chaos-mesh.org_golangchaos.yaml
     action: sql-query-error
     mode: one
-    duration: "10s"
+    duration: "20s"
     containerNames:
-        - httpxorm
+        - httpapp
     selector:
         labelSelectors:
-            app: httpxorm
+            app: httpapp
     scheduler:
         cron: "@every 2m"
