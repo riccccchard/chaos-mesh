@@ -556,10 +556,10 @@ make
 则会将我们修改的内容新建为本地镜像，名字为
 
 ```go
-localhost:5000/pingcap/chaos-fs    
-localhost:5000/pingcap/chaos-mesh      
-localhost:5000/pingcap/chaos-dashboard    
-localhost:5000/pingcap/chaos-daemon  
+localhost:5000/pingcap/chaos-fs
+localhost:5000/pingcap/chaos-mesh
+localhost:5000/pingcap/chaos-dashboard
+localhost:5000/pingcap/chaos-daemon
 ```
 
 如果有需要，可以用以下命令上传镜像（非必须）
@@ -567,6 +567,14 @@ localhost:5000/pingcap/chaos-daemon
 ```bash
 make docker_push
 ```
+
+我们还可以通过修改Makefile文件来修改docker镜像的名字，修改
+```Makefile
+# Set DEBUGGER=1 to build debug symbols
+LDFLAGS = $(if $(IMG_LDFLAGS),$(IMG_LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
+DOCKER_REGISTRY ?= "riccccchard"
+```
+中的
 
 ### 10.  最后，修改install.sh的内容
 
@@ -609,6 +617,8 @@ spec:
 ```
 
 前提是需要在集群中安装httpapp这个应用
+
+此应用启动了一个http请求，每次curl都会使用sql库去查询数据库中的数据
 
 代码和deploy文件放在chaos-mesh/test/httpapp文件夹中
 
