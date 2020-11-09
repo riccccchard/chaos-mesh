@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
@@ -41,11 +42,11 @@ type endpoint struct {
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.InnerObject) error{
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 	var err error
 
-	golangChaos , ok := obj.(*v1alpha1.GolangChaos)
-	if !ok{
+	golangChaos, ok := obj.(*v1alpha1.GolangChaos)
+	if !ok {
 		err = errors.New("chaos is not golang chaos")
 		r.Log.Error(err, "chaos is not golang chaos", "chaos", obj)
 		return err
@@ -53,51 +54,51 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 	allContainers := false
 	containerMap := make(map[string]bool)
 	//如果containers为空，就需要将所有的pod中的container注入异常，除了pause
-	if len( golangChaos.Spec.ContainerNames) == 0{
+	if len(golangChaos.Spec.ContainerNames) == 0 {
 		r.Log.Info("golangchaos.ContainerNames is empty , ready to set all containers.")
 		allContainers = true
-	}else{
-		for i := range golangChaos.Spec.ContainerNames{
+	} else {
+		for i := range golangChaos.Spec.ContainerNames {
 			containerMap[golangChaos.Spec.ContainerNames[i]] = true
 		}
 	}
 
-	pods , err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader , &golangChaos.Spec)
-	if err != nil{
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &golangChaos.Spec)
+	if err != nil {
 		r.Log.Error(err, "fail to select and filter pods")
 		return err
 	}
 
 	g := errgroup.Group{}
-	for podIndex := range pods{
+	for podIndex := range pods {
 		pod := &pods[podIndex]
 
-		for _ , container := range pod.Status.ContainerStatuses{
+		for _, container := range pod.Status.ContainerStatuses {
 			containerName := container.Name
 			containerID := container.ContainerID
-			_ , ok = containerMap[containerName]
+			_, ok = containerMap[containerName]
 			if (allContainers && containerName != "pause") || ok {
 
-				g.Go( func( ) error{
-					switch golangChaos.Spec.Action{
+				g.Go(func() error {
+					switch golangChaos.Spec.Action {
 					case v1alpha1.SqlErrorAction:
-						duration , err := golangChaos.GetDuration()
-						if err != nil{
+						duration, err := golangChaos.GetDuration()
+						if err != nil {
 							r.Log.Error(err, fmt.Sprintf(
 								"failed to get duration: %s, pod: %s, namespace: %s",
 								containerName, pod.Name, pod.Namespace))
 						}
-						err = r.GolangSetSqlError(ctx, pod , containerID , *duration)
+						err = r.GolangSetSqlError(ctx, pod, containerID, *duration)
 						if err != nil {
 							r.Log.Error(err, fmt.Sprintf(
 								"failed to set golang to container :%s ,  error : %s, pod: %s, namespace: %s",
-								containerName, pod.Name, pod.Namespace , containerName))
+								containerName, pod.Name, pod.Namespace, containerName))
 						}
 						//设置golangChaos失败并不影响继续运行，有可能设置到其他非golang容器上了
 						return nil
 					default:
 						err := errors.New("Unknow golang chaos action")
-						r.Log.Error(err , fmt.Sprintf("unknow golang chaos action"))
+						r.Log.Error(err, fmt.Sprintf("unknow golang chaos action"))
 						return err
 					}
 				})
@@ -105,13 +106,13 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 		}
 	}
 
-	if err = g.Wait() ; err != nil{
+	if err = g.Wait(); err != nil {
 		return err
 	}
 
 	golangChaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	msg := ""
-	for i := range golangChaos.Spec.ContainerNames{
+	for i := range golangChaos.Spec.ContainerNames {
 		msg += " " + golangChaos.Spec.ContainerNames[i]
 	}
 	for _, pod := range pods {
@@ -129,13 +130,14 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 	r.Event(obj, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
+
 //设置golang sql driver异常
-func (r *endpoint) GolangSetSqlError(ctx context.Context , pod *v1.Pod , containerID string, duration time.Duration) error{
-	r.Log.Info("Trying to set golang error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID )
+func (r *endpoint) GolangSetSqlError(ctx context.Context, pod *v1.Pod, containerID string, duration time.Duration) error {
+	r.Log.Info("Trying to set golang error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
-	pbClient , err := utils.NewChaosDaemonClient(ctx, r.Client, pod , common.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
 
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	defer pbClient.Close()
@@ -145,9 +147,9 @@ func (r *endpoint) GolangSetSqlError(ctx context.Context , pod *v1.Pod , contain
 	}
 	//将其转化成秒
 	seconds := int64(duration.Seconds())
-	response , err := pbClient.SetGolangError(ctx, &pb.GolangErrorRequest{Action: &pb.GolangErrorAction{Action: pb.GolangErrorAction_SqlErrorAction} , ContainerId: containerID, Duration: seconds})
+	response, err := pbClient.SetGolangError(ctx, &pb.GolangErrorRequest{Action: &pb.GolangErrorAction{Action: pb.GolangErrorAction_SqlErrorAction}, ContainerId: containerID, Duration: seconds})
 
-	if err != nil{
+	if err != nil {
 		r.Log.Error(err, "set golang exception error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 		return err
 	}
@@ -159,7 +161,7 @@ func (r *endpoint) GolangSetSqlError(ctx context.Context , pod *v1.Pod , contain
 
 func init() {
 	router.Register("golangchaos", &v1alpha1.GolangChaos{}, func(obj runtime.Object) bool {
-		_ , ok := obj.(*v1alpha1.GolangChaos)
+		_, ok := obj.(*v1alpha1.GolangChaos)
 		if !ok {
 			return false
 		}
