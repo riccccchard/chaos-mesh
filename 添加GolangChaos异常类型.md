@@ -61,7 +61,7 @@ type GolangChaosAction string
 
 const (
 	//sql query error 表示将sql.(*DB).Query的error返回值设置为非nil
-	SqlQueryErrorAction GolangChaosAction = "sql-query-error"
+	SqlErrorAction GolangChaosAction = "sql-error"
 )
 
 // GolangChaosSpec defines the attributes that a user creates on a chaos experiment about golang inject.
@@ -74,9 +74,9 @@ type GolangChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific pod chaos action.
-	// Supported action: sql-query-error
-	// Default action: sql-query-error
-	// +kubebuilder:validation:Enum=sql-query-error
+	// Supported action: sql-error
+	// Default action: sql-error
+	// +kubebuilder:validation:Enum=sql-error
 	Action GolangChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
@@ -92,7 +92,7 @@ type GolangChaosSpec struct {
 	Value string `json:"value"`
 
 	// Duration represents the duration of the chaos action.
-	// It is required when the action is `SqlQueryErrorAction`.
+	// It is required when the action is `SqlErrorAction`.
 	// A duration string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms", "-1.5h" or "2h45m".
@@ -100,10 +100,10 @@ type GolangChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
-	// ContainerName indicates the name of the container.
-	// Needed in SqlQueryErrorAction
+	// ContainerNames表示需要hack的多个containers,
+	// 如果不指明，chaos mesh将会将pod中所有的containers(除了pause)注入异常
 	// +optional
-	ContainerName string `json:"containerName"`
+	ContainerNames []string `json:"containerName,omitempty"`
 
 	// GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
 	// Value must be non-negative integer. The default value is zero that indicates delete immediately.
@@ -128,6 +128,20 @@ func (in *GolangChaosSpec) GetValue() string {
 type GolangChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
+
+//// PodStatus represents information about the status of a pod in chaos experiment.
+//type PodStatus struct {
+//	Namespace string `json:"namespace"`
+//	Name      string `json:"name"`
+//	Action    string `json:"action"`
+//	HostIP    string `json:"hostIP"`
+//	PodIP     string `json:"podIP"`
+//
+//	// A brief CamelCase message indicating details about the chaos action.
+//	// e.g. "delete this pod" or "pause this pod duration 5m"
+//	// +optional
+//	Message string `json:"message"`
+//}
 
 ```
 
@@ -224,10 +238,16 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 		r.Log.Error(err, "chaos is not golang chaos", "chaos", obj)
 		return err
 	}
-	//containerName 不能为空
-	if golangChaos.Spec.ContainerName == ""{
-		r.Log.Error(nil, "the name of container is empty", "name", req.Name, "namespace", req.Namespace)
-		return fmt.Errorf("golangchaos[%s/%s] the name of container is empty", golangChaos.Namespace, golangChaos.Name)
+	allContainers := false
+	containerMap := make(map[string]bool)
+	//如果containers为空，就需要将所有的pod中的container注入异常，除了pause
+	if len( golangChaos.Spec.ContainerNames) == 0{
+		r.Log.Info("golangchaos.ContainerNames is empty , ready to set all containers.")
+		allContainers = true
+	}else{
+		for i := range golangChaos.Spec.ContainerNames{
+			containerMap[golangChaos.Spec.ContainerNames[i]] = true
+		}
 	}
 
 	pods , err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader , &golangChaos.Spec)
@@ -237,32 +257,31 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 	}
 
 	g := errgroup.Group{}
-	haveContainer := false
 	for podIndex := range pods{
 		pod := &pods[podIndex]
 
 		for _ , container := range pod.Status.ContainerStatuses{
 			containerName := container.Name
 			containerID := container.ContainerID
-
-			if containerName == golangChaos.Spec.ContainerName{
-				haveContainer = true
+			_ , ok = containerMap[containerName]
+			if (allContainers && containerName != "pause") || ok {
 
 				g.Go( func( ) error{
 					switch golangChaos.Spec.Action{
-					case v1alpha1.SqlQueryErrorAction:
+					case v1alpha1.SqlErrorAction:
 						duration , err := golangChaos.GetDuration()
 						if err != nil{
 							r.Log.Error(err, fmt.Sprintf(
 								"failed to get duration: %s, pod: %s, namespace: %s",
 								containerName, pod.Name, pod.Namespace))
 						}
-						err = r.GolangSetSqlQueryError(ctx, pod , containerID , *duration)
+						err = r.GolangSetSqlError(ctx, pod , containerID , *duration)
 						if err != nil {
 							r.Log.Error(err, fmt.Sprintf(
-								"failed to set golang error : %s, pod: %s, namespace: %s",
-								containerName, pod.Name, pod.Namespace))
+								"failed to set golang to container :%s ,  error : %s, pod: %s, namespace: %s",
+								containerName, pod.Name, pod.Namespace , containerName))
 						}
+						//设置golangChaos失败并不影响继续运行，有可能设置到其他非golang容器上了
 						return nil
 					default:
 						err := errors.New("Unknow golang chaos action")
@@ -274,15 +293,15 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 		}
 	}
 
-	if !haveContainer{
-		return fmt.Errorf("can't find container in pods : containerName : %s", golangChaos.Spec.ContainerName)
-	}
-
 	if err = g.Wait() ; err != nil{
 		return err
 	}
 
 	golangChaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
+	msg := ""
+	for i := range golangChaos.Spec.ContainerNames{
+		msg += " " + golangChaos.Spec.ContainerNames[i]
+	}
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -290,7 +309,7 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(golangChaos.Spec.Action),
-			Message:   fmt.Sprintf(golangSqlQueryErrorActionMsg, golangChaos.Spec.ContainerName),
+			Message:   fmt.Sprintf(golangSqlQueryErrorActionMsg, msg),
 		}
 
 		golangChaos.Status.Experiment.PodRecords = append(golangChaos.Status.Experiment.PodRecords, ps)
@@ -298,9 +317,9 @@ func (r *endpoint) Apply(ctx context.Context , req ctrl.Request , obj v1alpha1.I
 	r.Event(obj, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
-//设置sql.(*DB).Query的异常
-func (r *endpoint) GolangSetSqlQueryError (ctx context.Context , pod *v1.Pod , containerID string, duration time.Duration) error{
-	r.Log.Info("Try to set golang error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID )
+//设置golang sql driver异常
+func (r *endpoint) GolangSetSqlError(ctx context.Context , pod *v1.Pod , containerID string, duration time.Duration) error{
+	r.Log.Info("Trying to set golang error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID )
 
 	pbClient , err := utils.NewChaosDaemonClient(ctx, r.Client, pod , common.ControllerCfg.ChaosDaemonPort)
 
@@ -314,7 +333,7 @@ func (r *endpoint) GolangSetSqlQueryError (ctx context.Context , pod *v1.Pod , c
 	}
 	//将其转化成秒
 	seconds := int64(duration.Seconds())
-	response , err := pbClient.SetGolangError(ctx, &pb.GolangErrorRequest{Action: &pb.GolangErrorAction{Action: pb.GolangErrorAction_SqlQueryErrorAction} , ContainerId: containerID, Duration: seconds})
+	response , err := pbClient.SetGolangError(ctx, &pb.GolangErrorRequest{Action: &pb.GolangErrorAction{Action: pb.GolangErrorAction_SqlErrorAction} , ContainerId: containerID, Duration: seconds})
 
 	if err != nil{
 		r.Log.Error(err, "set golang exception error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
@@ -344,6 +363,7 @@ func init() {
 // Recover implements the reconciler.InnerReconciler.Recover
 //恢复pod/container状态，清除delve_tool这个process
 //其实没必要，到点process就被kill掉了
+//如果随意清除反而会留下断点之类，确保正常退出很重要
 func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 	//golangChaos , ok := obj.(*v1alpha1.GolangChaos)
 	//if !ok{
@@ -414,7 +434,7 @@ message GolangErrorResponse{
 
 message GolangErrorAction{
   enum Action{
-      SqlQueryErrorAction = 0;
+      SqlErrorAction = 0;
   }
   Action action= 1;
 }
@@ -442,12 +462,13 @@ const(
 
 func getErrorType(action pb.GolangErrorAction_Action)int {
 	switch action {
-	case pb.GolangErrorAction_SqlQueryErrorAction:
+	case pb.GolangErrorAction_SqlErrorAction:
 		return 0
 	}
 	return -1
 }
 //设置golang异常
+//0 : 表示sql error action，将会调用delve_tool修改dababase/sql.(*DB)的所有函数的返回值
 func (s *daemonServer) SetGolangError(ctx context.Context, request *pb.GolangErrorRequest) (*pb.GolangErrorResponse, error) {
 	log.Info("trying to set golang error to target container , ", "containerID", request.ContainerId , "Action" , request.Action)
 
@@ -499,7 +520,6 @@ func (s *daemonServer) SetGolangError(ctx context.Context, request *pb.GolangErr
 		Pid: pid,
 	}, nil
 }
-
 ```
 
 代码的逻辑很简单，获取参数后，启动我们的二进制工具去attach目标进程即可。
@@ -534,7 +554,7 @@ RUN apt-get update && apt-get install -y tzdata procps iptables ipset stress-ng 
 
 RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
-ADD https://github.com/riccccchard/delve_tool/releases/download/delve_tool-0.3.0/delve_tool /usr/local/bin/
+ADD https://github.com/riccccchard/delve_tool/releases/download/delve_tool-0.4.2/delve_tool /usr/local/bin/
 #防止权限不足
 RUN chmod 777 /usr/local/bin/delve_tool
 ENV RUST_BACKTRACE 1
@@ -568,13 +588,13 @@ localhost:5000/pingcap/chaos-daemon
 make docker_push
 ```
 
-我们还可以通过修改Makefile文件来修改docker镜像的名字，修改
+我们还可以通过修改Makefile文件来修改docker镜像的名字，
 ```Makefile
 # Set DEBUGGER=1 to build debug symbols
 LDFLAGS = $(if $(IMG_LDFLAGS),$(IMG_LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
 DOCKER_REGISTRY ?= "riccccchard"
 ```
-中的
+如上，修改makefile中的DOCKER_REGISTRY为自定义名字riccccchard，就会获得以riccccchard为前缀的镜像。
 
 ### 10.  最后，修改install.sh的内容
 
@@ -604,10 +624,11 @@ metadata:
     namespace: chaos-testing
 spec:
     #action为枚举类型，选择可以参考config/bases/chaos-mesh.org_golangchaos.yaml
-    action: sql-query-error
+    action: sql-error
     mode: one
-    duration: "30s"
-    containerName: httpapp
+    duration: "20s"
+    containerNames:
+        - httpapp
     selector:
         labelSelectors:
             app: httpapp

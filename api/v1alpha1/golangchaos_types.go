@@ -38,7 +38,7 @@ type GolangChaosAction string
 
 const (
 	//sql query error 表示将sql.(*DB).Query的error返回值设置为非nil
-	SqlErrorAction GolangChaosAction = "sql-query-error"
+	SqlErrorAction GolangChaosAction = "sql-error"
 )
 
 // GolangChaosSpec defines the attributes that a user creates on a chaos experiment about golang inject.
@@ -51,9 +51,9 @@ type GolangChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific pod chaos action.
-	// Supported action: sql-query-error
-	// Default action: sql-query-error
-	// +kubebuilder:validation:Enum=sql-query-error
+	// Supported action: sql-error
+	// Default action: sql-error
+	// +kubebuilder:validation:Enum=sql-error
 	Action GolangChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.

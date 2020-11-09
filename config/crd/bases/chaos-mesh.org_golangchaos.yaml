@@ -36,9 +36,9 @@ spec:
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
-                action: sql-query-error Default action: sql-query-error'
+                action: sql-error Default action: sql-error'
               enum:
-              - sql-query-error
+              - sql-error
               type: string
             containerName:
               description: ContainerNames表示需要hack的多个containers, 如果不指明，chaos mesh将会将pod中所有的containers(除了pause)注入异常

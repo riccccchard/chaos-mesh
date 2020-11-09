@@ -175,6 +175,7 @@ func init() {
 // Recover implements the reconciler.InnerReconciler.Recover
 //恢复pod/container状态，清除delve_tool这个process
 //其实没必要，到点process就被kill掉了
+//如果随意清除反而会留下断点之类，确保正常退出很重要
 func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 	//golangChaos , ok := obj.(*v1alpha1.GolangChaos)
 	//if !ok{
