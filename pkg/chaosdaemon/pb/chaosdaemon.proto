@@ -8,7 +8,7 @@ service ChaosDaemon {
   rpc SetTcs(TcsRequest) returns (google.protobuf.Empty) {}
 
   rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
-  
+
   rpc SetIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
 
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
@@ -16,6 +16,8 @@ service ChaosDaemon {
 
   rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
   rpc ContainerGetPid (ContainerRequest) returns (ContainerResponse) {}
+
+  rpc SetGolangError (GolangErrorRequest) returns (GolangErrorResponse) {}
 
   rpc ExecStressors (ExecStressRequest) returns (ExecStressResponse) {}
   rpc CancelStressors (CancelStressRequest) returns (google.protobuf.Empty) {}
@@ -28,6 +30,26 @@ service ChaosDaemon {
 message TcHandle {
   uint32 major = 1;
   uint32 minor = 2;
+}
+
+message GolangErrorRequest{
+  GolangErrorAction action = 1;
+  string container_id = 2;
+  //持续时间，换算成秒
+  int64 duration = 3;
+}
+message GolangErrorResponse{
+  //返回注入给了哪个进程
+  uint32 pid = 1;
+  //开始的时间
+  int64 startTime = 2;
+}
+
+message GolangErrorAction{
+  enum Action{
+      SqlErrorAction = 0;
+  }
+  Action action= 1;
 }
 
 message ContainerRequest{

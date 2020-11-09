@@ -4,16 +4,12 @@
 package pb
 
 import (
+	context "context"
 	fmt "fmt"
-
-	proto "github.com/golang/protobuf/proto"
-
 	math "math"
 
+	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
-
-	context "golang.org/x/net/context"
-
 	grpc "google.golang.org/grpc"
 )
 
@@ -26,7 +22,29 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
+
+type GolangErrorAction_Action int32
+
+const (
+	GolangErrorAction_SqlQueryErrorAction GolangErrorAction_Action = 0
+)
+
+var GolangErrorAction_Action_name = map[int32]string{
+	0: "SqlQueryErrorAction",
+}
+
+var GolangErrorAction_Action_value = map[string]int32{
+	"SqlQueryErrorAction": 0,
+}
+
+func (x GolangErrorAction_Action) String() string {
+	return proto.EnumName(GolangErrorAction_Action_name, int32(x))
+}
+
+func (GolangErrorAction_Action) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{3, 0}
+}
 
 type Chain_Direction int32
 
@@ -39,6 +57,7 @@ var Chain_Direction_name = map[int32]string{
 	0: "INPUT",
 	1: "OUTPUT",
 }
+
 var Chain_Direction_value = map[string]int32{
 	"INPUT":  0,
 	"OUTPUT": 1,
@@ -47,6 +66,7 @@ var Chain_Direction_value = map[string]int32{
 func (x Chain_Direction) String() string {
 	return proto.EnumName(Chain_Direction_name, int32(x))
 }
+
 func (Chain_Direction) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{16, 0}
 }
@@ -62,6 +82,7 @@ var ContainerAction_Action_name = map[int32]string{
 	0: "KILL",
 	1: "GETPID",
 }
+
 var ContainerAction_Action_value = map[string]int32{
 	"KILL":   0,
 	"GETPID": 1,
@@ -70,6 +91,7 @@ var ContainerAction_Action_value = map[string]int32{
 func (x ContainerAction_Action) String() string {
 	return proto.EnumName(ContainerAction_Action_name, int32(x))
 }
+
 func (ContainerAction_Action) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{18, 0}
 }
@@ -85,6 +107,7 @@ var ExecStressRequest_Scope_name = map[int32]string{
 	0: "CONTAINER",
 	1: "POD",
 }
+
 var ExecStressRequest_Scope_value = map[string]int32{
 	"CONTAINER": 0,
 	"POD":       1,
@@ -93,6 +116,7 @@ var ExecStressRequest_Scope_value = map[string]int32{
 func (x ExecStressRequest_Scope) String() string {
 	return proto.EnumName(ExecStressRequest_Scope_name, int32(x))
 }
+
 func (ExecStressRequest_Scope) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{19, 0}
 }
@@ -108,6 +132,7 @@ var Tc_Type_name = map[int32]string{
 	0: "NETEM",
 	1: "BANDWIDTH",
 }
+
 var Tc_Type_value = map[string]int32{
 	"NETEM":     0,
 	"BANDWIDTH": 1,
@@ -116,6 +141,7 @@ var Tc_Type_value = map[string]int32{
 func (x Tc_Type) String() string {
 	return proto.EnumName(Tc_Type_name, int32(x))
 }
+
 func (Tc_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{25, 0}
 }
@@ -134,14 +160,15 @@ func (*TcHandle) ProtoMessage()    {}
 func (*TcHandle) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{0}
 }
+
 func (m *TcHandle) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TcHandle.Unmarshal(m, b)
 }
 func (m *TcHandle) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TcHandle.Marshal(b, m, deterministic)
 }
-func (dst *TcHandle) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TcHandle.Merge(dst, src)
+func (m *TcHandle) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcHandle.Merge(m, src)
 }
 func (m *TcHandle) XXX_Size() int {
 	return xxx_messageInfo_TcHandle.Size(m)
@@ -166,6 +193,150 @@ func (m *TcHandle) GetMinor() uint32 {
 	return 0
 }
 
+type GolangErrorRequest struct {
+	Action      *GolangErrorAction `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	ContainerId string             `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	//持续时间，换算成秒
+	Duration             int64    `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GolangErrorRequest) Reset()         { *m = GolangErrorRequest{} }
+func (m *GolangErrorRequest) String() string { return proto.CompactTextString(m) }
+func (*GolangErrorRequest) ProtoMessage()    {}
+func (*GolangErrorRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{1}
+}
+
+func (m *GolangErrorRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GolangErrorRequest.Unmarshal(m, b)
+}
+func (m *GolangErrorRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GolangErrorRequest.Marshal(b, m, deterministic)
+}
+func (m *GolangErrorRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GolangErrorRequest.Merge(m, src)
+}
+func (m *GolangErrorRequest) XXX_Size() int {
+	return xxx_messageInfo_GolangErrorRequest.Size(m)
+}
+func (m *GolangErrorRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GolangErrorRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GolangErrorRequest proto.InternalMessageInfo
+
+func (m *GolangErrorRequest) GetAction() *GolangErrorAction {
+	if m != nil {
+		return m.Action
+	}
+	return nil
+}
+
+func (m *GolangErrorRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+func (m *GolangErrorRequest) GetDuration() int64 {
+	if m != nil {
+		return m.Duration
+	}
+	return 0
+}
+
+type GolangErrorResponse struct {
+	//返回注入给了哪个进程
+	Pid uint32 `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
+	//开始的时间
+	StartTime            int64    `protobuf:"varint,2,opt,name=startTime,proto3" json:"startTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GolangErrorResponse) Reset()         { *m = GolangErrorResponse{} }
+func (m *GolangErrorResponse) String() string { return proto.CompactTextString(m) }
+func (*GolangErrorResponse) ProtoMessage()    {}
+func (*GolangErrorResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{2}
+}
+
+func (m *GolangErrorResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GolangErrorResponse.Unmarshal(m, b)
+}
+func (m *GolangErrorResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GolangErrorResponse.Marshal(b, m, deterministic)
+}
+func (m *GolangErrorResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GolangErrorResponse.Merge(m, src)
+}
+func (m *GolangErrorResponse) XXX_Size() int {
+	return xxx_messageInfo_GolangErrorResponse.Size(m)
+}
+func (m *GolangErrorResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GolangErrorResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GolangErrorResponse proto.InternalMessageInfo
+
+func (m *GolangErrorResponse) GetPid() uint32 {
+	if m != nil {
+		return m.Pid
+	}
+	return 0
+}
+
+func (m *GolangErrorResponse) GetStartTime() int64 {
+	if m != nil {
+		return m.StartTime
+	}
+	return 0
+}
+
+type GolangErrorAction struct {
+	Action               GolangErrorAction_Action `protobuf:"varint,1,opt,name=action,proto3,enum=pb.GolangErrorAction_Action" json:"action,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
+}
+
+func (m *GolangErrorAction) Reset()         { *m = GolangErrorAction{} }
+func (m *GolangErrorAction) String() string { return proto.CompactTextString(m) }
+func (*GolangErrorAction) ProtoMessage()    {}
+func (*GolangErrorAction) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{3}
+}
+
+func (m *GolangErrorAction) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GolangErrorAction.Unmarshal(m, b)
+}
+func (m *GolangErrorAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GolangErrorAction.Marshal(b, m, deterministic)
+}
+func (m *GolangErrorAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GolangErrorAction.Merge(m, src)
+}
+func (m *GolangErrorAction) XXX_Size() int {
+	return xxx_messageInfo_GolangErrorAction.Size(m)
+}
+func (m *GolangErrorAction) XXX_DiscardUnknown() {
+	xxx_messageInfo_GolangErrorAction.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GolangErrorAction proto.InternalMessageInfo
+
+func (m *GolangErrorAction) GetAction() GolangErrorAction_Action {
+	if m != nil {
+		return m.Action
+	}
+	return GolangErrorAction_SqlQueryErrorAction
+}
+
 type ContainerRequest struct {
 	Action               *ContainerAction `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
 	ContainerId          string           `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
@@ -180,14 +351,15 @@ func (*ContainerRequest) ProtoMessage()    {}
 func (*ContainerRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{1}
 }
+
 func (m *ContainerRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ContainerRequest.Unmarshal(m, b)
 }
 func (m *ContainerRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ContainerRequest.Marshal(b, m, deterministic)
 }
-func (dst *ContainerRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContainerRequest.Merge(dst, src)
+func (m *ContainerRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContainerRequest.Merge(m, src)
 }
 func (m *ContainerRequest) XXX_Size() int {
 	return xxx_messageInfo_ContainerRequest.Size(m)
@@ -225,14 +397,15 @@ func (*ContainerResponse) ProtoMessage()    {}
 func (*ContainerResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{2}
 }
+
 func (m *ContainerResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ContainerResponse.Unmarshal(m, b)
 }
 func (m *ContainerResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ContainerResponse.Marshal(b, m, deterministic)
 }
-func (dst *ContainerResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContainerResponse.Merge(dst, src)
+func (m *ContainerResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContainerResponse.Merge(m, src)
 }
 func (m *ContainerResponse) XXX_Size() int {
 	return xxx_messageInfo_ContainerResponse.Size(m)
@@ -266,14 +439,15 @@ func (*NetemRequest) ProtoMessage()    {}
 func (*NetemRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{3}
 }
+
 func (m *NetemRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NetemRequest.Unmarshal(m, b)
 }
 func (m *NetemRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_NetemRequest.Marshal(b, m, deterministic)
 }
-func (dst *NetemRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_NetemRequest.Merge(dst, src)
+func (m *NetemRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_NetemRequest.Merge(m, src)
 }
 func (m *NetemRequest) XXX_Size() int {
 	return xxx_messageInfo_NetemRequest.Size(m)
@@ -339,14 +513,15 @@ func (*Netem) ProtoMessage()    {}
 func (*Netem) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{4}
 }
+
 func (m *Netem) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Netem.Unmarshal(m, b)
 }
 func (m *Netem) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Netem.Marshal(b, m, deterministic)
 }
-func (dst *Netem) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Netem.Merge(dst, src)
+func (m *Netem) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Netem.Merge(m, src)
 }
 func (m *Netem) XXX_Size() int {
 	return xxx_messageInfo_Netem.Size(m)
@@ -476,14 +651,15 @@ func (*TbfRequest) ProtoMessage()    {}
 func (*TbfRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{5}
 }
+
 func (m *TbfRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TbfRequest.Unmarshal(m, b)
 }
 func (m *TbfRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TbfRequest.Marshal(b, m, deterministic)
 }
-func (dst *TbfRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TbfRequest.Merge(dst, src)
+func (m *TbfRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TbfRequest.Merge(m, src)
 }
 func (m *TbfRequest) XXX_Size() int {
 	return xxx_messageInfo_TbfRequest.Size(m)
@@ -525,14 +701,15 @@ func (*Tbf) ProtoMessage()    {}
 func (*Tbf) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{6}
 }
+
 func (m *Tbf) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Tbf.Unmarshal(m, b)
 }
 func (m *Tbf) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Tbf.Marshal(b, m, deterministic)
 }
-func (dst *Tbf) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Tbf.Merge(dst, src)
+func (m *Tbf) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Tbf.Merge(m, src)
 }
 func (m *Tbf) XXX_Size() int {
 	return xxx_messageInfo_Tbf.Size(m)
@@ -592,14 +769,15 @@ func (*QdiscRequest) ProtoMessage()    {}
 func (*QdiscRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{7}
 }
+
 func (m *QdiscRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QdiscRequest.Unmarshal(m, b)
 }
 func (m *QdiscRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QdiscRequest.Marshal(b, m, deterministic)
 }
-func (dst *QdiscRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QdiscRequest.Merge(dst, src)
+func (m *QdiscRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QdiscRequest.Merge(m, src)
 }
 func (m *QdiscRequest) XXX_Size() int {
 	return xxx_messageInfo_QdiscRequest.Size(m)
@@ -640,14 +818,15 @@ func (*Qdisc) ProtoMessage()    {}
 func (*Qdisc) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{8}
 }
+
 func (m *Qdisc) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Qdisc.Unmarshal(m, b)
 }
 func (m *Qdisc) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Qdisc.Marshal(b, m, deterministic)
 }
-func (dst *Qdisc) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Qdisc.Merge(dst, src)
+func (m *Qdisc) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Qdisc.Merge(m, src)
 }
 func (m *Qdisc) XXX_Size() int {
 	return xxx_messageInfo_Qdisc.Size(m)
@@ -700,14 +879,15 @@ func (*EmatchFilterRequest) ProtoMessage()    {}
 func (*EmatchFilterRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{9}
 }
+
 func (m *EmatchFilterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EmatchFilterRequest.Unmarshal(m, b)
 }
 func (m *EmatchFilterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_EmatchFilterRequest.Marshal(b, m, deterministic)
 }
-func (dst *EmatchFilterRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_EmatchFilterRequest.Merge(dst, src)
+func (m *EmatchFilterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmatchFilterRequest.Merge(m, src)
 }
 func (m *EmatchFilterRequest) XXX_Size() int {
 	return xxx_messageInfo_EmatchFilterRequest.Size(m)
@@ -747,14 +927,15 @@ func (*EmatchFilter) ProtoMessage()    {}
 func (*EmatchFilter) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{10}
 }
+
 func (m *EmatchFilter) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EmatchFilter.Unmarshal(m, b)
 }
 func (m *EmatchFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_EmatchFilter.Marshal(b, m, deterministic)
 }
-func (dst *EmatchFilter) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_EmatchFilter.Merge(dst, src)
+func (m *EmatchFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmatchFilter.Merge(m, src)
 }
 func (m *EmatchFilter) XXX_Size() int {
 	return xxx_messageInfo_EmatchFilter.Size(m)
@@ -800,14 +981,15 @@ func (*TcFilterRequest) ProtoMessage()    {}
 func (*TcFilterRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{11}
 }
+
 func (m *TcFilterRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TcFilterRequest.Unmarshal(m, b)
 }
 func (m *TcFilterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TcFilterRequest.Marshal(b, m, deterministic)
 }
-func (dst *TcFilterRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TcFilterRequest.Merge(dst, src)
+func (m *TcFilterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcFilterRequest.Merge(m, src)
 }
 func (m *TcFilterRequest) XXX_Size() int {
 	return xxx_messageInfo_TcFilterRequest.Size(m)
@@ -845,14 +1027,15 @@ func (*TcFilter) ProtoMessage()    {}
 func (*TcFilter) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{12}
 }
+
 func (m *TcFilter) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TcFilter.Unmarshal(m, b)
 }
 func (m *TcFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TcFilter.Marshal(b, m, deterministic)
 }
-func (dst *TcFilter) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TcFilter.Merge(dst, src)
+func (m *TcFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcFilter.Merge(m, src)
 }
 func (m *TcFilter) XXX_Size() int {
 	return xxx_messageInfo_TcFilter.Size(m)
@@ -884,14 +1067,15 @@ func (*IPSetsRequest) ProtoMessage()    {}
 func (*IPSetsRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{13}
 }
+
 func (m *IPSetsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IPSetsRequest.Unmarshal(m, b)
 }
 func (m *IPSetsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_IPSetsRequest.Marshal(b, m, deterministic)
 }
-func (dst *IPSetsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_IPSetsRequest.Merge(dst, src)
+func (m *IPSetsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IPSetsRequest.Merge(m, src)
 }
 func (m *IPSetsRequest) XXX_Size() int {
 	return xxx_messageInfo_IPSetsRequest.Size(m)
@@ -930,14 +1114,15 @@ func (*IPSet) ProtoMessage()    {}
 func (*IPSet) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{14}
 }
+
 func (m *IPSet) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IPSet.Unmarshal(m, b)
 }
 func (m *IPSet) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_IPSet.Marshal(b, m, deterministic)
 }
-func (dst *IPSet) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_IPSet.Merge(dst, src)
+func (m *IPSet) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IPSet.Merge(m, src)
 }
 func (m *IPSet) XXX_Size() int {
 	return xxx_messageInfo_IPSet.Size(m)
@@ -976,14 +1161,15 @@ func (*IptablesChainsRequest) ProtoMessage()    {}
 func (*IptablesChainsRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{15}
 }
+
 func (m *IptablesChainsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IptablesChainsRequest.Unmarshal(m, b)
 }
 func (m *IptablesChainsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_IptablesChainsRequest.Marshal(b, m, deterministic)
 }
-func (dst *IptablesChainsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_IptablesChainsRequest.Merge(dst, src)
+func (m *IptablesChainsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IptablesChainsRequest.Merge(m, src)
 }
 func (m *IptablesChainsRequest) XXX_Size() int {
 	return xxx_messageInfo_IptablesChainsRequest.Size(m)
@@ -1024,14 +1210,15 @@ func (*Chain) ProtoMessage()    {}
 func (*Chain) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{16}
 }
+
 func (m *Chain) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Chain.Unmarshal(m, b)
 }
 func (m *Chain) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Chain.Marshal(b, m, deterministic)
 }
-func (dst *Chain) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Chain.Merge(dst, src)
+func (m *Chain) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Chain.Merge(m, src)
 }
 func (m *Chain) XXX_Size() int {
 	return xxx_messageInfo_Chain.Size(m)
@@ -1086,14 +1273,15 @@ func (*TimeRequest) ProtoMessage()    {}
 func (*TimeRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{17}
 }
+
 func (m *TimeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TimeRequest.Unmarshal(m, b)
 }
 func (m *TimeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TimeRequest.Marshal(b, m, deterministic)
 }
-func (dst *TimeRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TimeRequest.Merge(dst, src)
+func (m *TimeRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TimeRequest.Merge(m, src)
 }
 func (m *TimeRequest) XXX_Size() int {
 	return xxx_messageInfo_TimeRequest.Size(m)
@@ -1145,14 +1333,15 @@ func (*ContainerAction) ProtoMessage()    {}
 func (*ContainerAction) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{18}
 }
+
 func (m *ContainerAction) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ContainerAction.Unmarshal(m, b)
 }
 func (m *ContainerAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ContainerAction.Marshal(b, m, deterministic)
 }
-func (dst *ContainerAction) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContainerAction.Merge(dst, src)
+func (m *ContainerAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContainerAction.Merge(m, src)
 }
 func (m *ContainerAction) XXX_Size() int {
 	return xxx_messageInfo_ContainerAction.Size(m)
@@ -1185,14 +1374,15 @@ func (*ExecStressRequest) ProtoMessage()    {}
 func (*ExecStressRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{19}
 }
+
 func (m *ExecStressRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExecStressRequest.Unmarshal(m, b)
 }
 func (m *ExecStressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ExecStressRequest.Marshal(b, m, deterministic)
 }
-func (dst *ExecStressRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExecStressRequest.Merge(dst, src)
+func (m *ExecStressRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExecStressRequest.Merge(m, src)
 }
 func (m *ExecStressRequest) XXX_Size() int {
 	return xxx_messageInfo_ExecStressRequest.Size(m)
@@ -1238,14 +1428,15 @@ func (*ExecStressResponse) ProtoMessage()    {}
 func (*ExecStressResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{20}
 }
+
 func (m *ExecStressResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExecStressResponse.Unmarshal(m, b)
 }
 func (m *ExecStressResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ExecStressResponse.Marshal(b, m, deterministic)
 }
-func (dst *ExecStressResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExecStressResponse.Merge(dst, src)
+func (m *ExecStressResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExecStressResponse.Merge(m, src)
 }
 func (m *ExecStressResponse) XXX_Size() int {
 	return xxx_messageInfo_ExecStressResponse.Size(m)
@@ -1284,14 +1475,15 @@ func (*CancelStressRequest) ProtoMessage()    {}
 func (*CancelStressRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{21}
 }
+
 func (m *CancelStressRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelStressRequest.Unmarshal(m, b)
 }
 func (m *CancelStressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CancelStressRequest.Marshal(b, m, deterministic)
 }
-func (dst *CancelStressRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CancelStressRequest.Merge(dst, src)
+func (m *CancelStressRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CancelStressRequest.Merge(m, src)
 }
 func (m *CancelStressRequest) XXX_Size() int {
 	return xxx_messageInfo_CancelStressRequest.Size(m)
@@ -1333,14 +1525,15 @@ func (*ApplyIoChaosRequest) ProtoMessage()    {}
 func (*ApplyIoChaosRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{22}
 }
+
 func (m *ApplyIoChaosRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplyIoChaosRequest.Unmarshal(m, b)
 }
 func (m *ApplyIoChaosRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ApplyIoChaosRequest.Marshal(b, m, deterministic)
 }
-func (dst *ApplyIoChaosRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ApplyIoChaosRequest.Merge(dst, src)
+func (m *ApplyIoChaosRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ApplyIoChaosRequest.Merge(m, src)
 }
 func (m *ApplyIoChaosRequest) XXX_Size() int {
 	return xxx_messageInfo_ApplyIoChaosRequest.Size(m)
@@ -1400,14 +1593,15 @@ func (*ApplyIoChaosResponse) ProtoMessage()    {}
 func (*ApplyIoChaosResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{23}
 }
+
 func (m *ApplyIoChaosResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ApplyIoChaosResponse.Unmarshal(m, b)
 }
 func (m *ApplyIoChaosResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ApplyIoChaosResponse.Marshal(b, m, deterministic)
 }
-func (dst *ApplyIoChaosResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ApplyIoChaosResponse.Merge(dst, src)
+func (m *ApplyIoChaosResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ApplyIoChaosResponse.Merge(m, src)
 }
 func (m *ApplyIoChaosResponse) XXX_Size() int {
 	return xxx_messageInfo_ApplyIoChaosResponse.Size(m)
@@ -1446,14 +1640,15 @@ func (*TcsRequest) ProtoMessage()    {}
 func (*TcsRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{24}
 }
+
 func (m *TcsRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TcsRequest.Unmarshal(m, b)
 }
 func (m *TcsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TcsRequest.Marshal(b, m, deterministic)
 }
-func (dst *TcsRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TcsRequest.Merge(dst, src)
+func (m *TcsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcsRequest.Merge(m, src)
 }
 func (m *TcsRequest) XXX_Size() int {
 	return xxx_messageInfo_TcsRequest.Size(m)
@@ -1494,14 +1689,15 @@ func (*Tc) ProtoMessage()    {}
 func (*Tc) Descriptor() ([]byte, []int) {
 	return fileDescriptor_chaosdaemon_88f348f1b924a25c, []int{25}
 }
+
 func (m *Tc) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Tc.Unmarshal(m, b)
 }
 func (m *Tc) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Tc.Marshal(b, m, deterministic)
 }
-func (dst *Tc) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Tc.Merge(dst, src)
+func (m *Tc) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Tc.Merge(m, src)
 }
 func (m *Tc) XXX_Size() int {
 	return xxx_messageInfo_Tc.Size(m)
@@ -1595,7 +1791,15 @@ func (m *SetDNSServerRequest) GetEnable() bool {
 }
 
 func init() {
+	proto.RegisterEnum("pb.GolangErrorAction_Action", GolangErrorAction_Action_name, GolangErrorAction_Action_value)
+	proto.RegisterEnum("pb.Chain_Direction", Chain_Direction_name, Chain_Direction_value)
+	proto.RegisterEnum("pb.ContainerAction_Action", ContainerAction_Action_name, ContainerAction_Action_value)
+	proto.RegisterEnum("pb.ExecStressRequest_Scope", ExecStressRequest_Scope_name, ExecStressRequest_Scope_value)
+	proto.RegisterEnum("pb.Tc_Type", Tc_Type_name, Tc_Type_value)
 	proto.RegisterType((*TcHandle)(nil), "pb.TcHandle")
+	proto.RegisterType((*GolangErrorRequest)(nil), "pb.GolangErrorRequest")
+	proto.RegisterType((*GolangErrorResponse)(nil), "pb.GolangErrorResponse")
+	proto.RegisterType((*GolangErrorAction)(nil), "pb.GolangErrorAction")
 	proto.RegisterType((*ContainerRequest)(nil), "pb.ContainerRequest")
 	proto.RegisterType((*ContainerResponse)(nil), "pb.ContainerResponse")
 	proto.RegisterType((*NetemRequest)(nil), "pb.NetemRequest")
@@ -1647,6 +1851,7 @@ type ChaosDaemonClient interface {
 	RecoverTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	ContainerKill(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	ContainerGetPid(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*ContainerResponse, error)
+	SetGolangError(ctx context.Context, in *GolangErrorRequest, opts ...grpc.CallOption) (*GolangErrorResponse, error)
 	ExecStressors(ctx context.Context, in *ExecStressRequest, opts ...grpc.CallOption) (*ExecStressResponse, error)
 	CancelStressors(ctx context.Context, in *CancelStressRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	ApplyIoChaos(ctx context.Context, in *ApplyIoChaosRequest, opts ...grpc.CallOption) (*ApplyIoChaosResponse, error)
@@ -1724,6 +1929,15 @@ func (c *chaosDaemonClient) ContainerGetPid(ctx context.Context, in *ContainerRe
 	return out, nil
 }
 
+func (c *chaosDaemonClient) SetGolangError(ctx context.Context, in *GolangErrorRequest, opts ...grpc.CallOption) (*GolangErrorResponse, error) {
+	out := new(GolangErrorResponse)
+	err := c.cc.Invoke(ctx, "/pb.ChaosDaemon/SetGolangError", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *chaosDaemonClient) ExecStressors(ctx context.Context, in *ExecStressRequest, opts ...grpc.CallOption) (*ExecStressResponse, error) {
 	out := new(ExecStressResponse)
 	err := c.cc.Invoke(ctx, "/pb.ChaosDaemon/ExecStressors", in, out, opts...)
@@ -1769,6 +1983,7 @@ type ChaosDaemonServer interface {
 	RecoverTimeOffset(context.Context, *TimeRequest) (*empty.Empty, error)
 	ContainerKill(context.Context, *ContainerRequest) (*empty.Empty, error)
 	ContainerGetPid(context.Context, *ContainerRequest) (*ContainerResponse, error)
+	SetGolangError(context.Context, *GolangErrorRequest) (*GolangErrorResponse, error)
 	ExecStressors(context.Context, *ExecStressRequest) (*ExecStressResponse, error)
 	CancelStressors(context.Context, *CancelStressRequest) (*empty.Empty, error)
 	ApplyIoChaos(context.Context, *ApplyIoChaosRequest) (*ApplyIoChaosResponse, error)
@@ -1905,6 +2120,24 @@ func _ChaosDaemon_ContainerGetPid_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChaosDaemon_SetGolangError_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GolangErrorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).SetGolangError(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.ChaosDaemon/SetGolangError",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).SetGolangError(ctx, req.(*GolangErrorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ChaosDaemon_ExecStressors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExecStressRequest)
 	if err := dec(in); err != nil {
@@ -2008,6 +2241,10 @@ var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ContainerGetPid",
 			Handler:    _ChaosDaemon_ContainerGetPid_Handler,
+		},
+		{
+			MethodName: "SetGolangError",
+			Handler:    _ChaosDaemon_SetGolangError_Handler,
 		},
 		{
 			MethodName: "ExecStressors",

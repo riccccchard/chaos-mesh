@@ -172,7 +172,7 @@ func (r *endpoint) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1a
 
 	return g.Wait()
 }
-
+//将pod中的container全部换为pause container，这样就failue掉了
 func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	r.Log.Info("Try to inject pod-failure", "namespace", pod.Namespace, "name", pod.Name)
 

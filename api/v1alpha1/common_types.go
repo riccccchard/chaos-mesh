@@ -71,6 +71,7 @@ type SelectorSpec struct {
 }
 
 // SchedulerSpec defines information about schedule of the chaos experiment.
+//目前的控制器规则只支持cron定时任务
 type SchedulerSpec struct {
 	// Cron defines a cron job rule.
 	//

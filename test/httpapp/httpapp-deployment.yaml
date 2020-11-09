@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    labels:
+        app: httpapp
+    name: httpapp
+spec:
+    selector:
+        matchLabels:
+            app: httpapp
+    replicas: 1
+    template: #定义pod
+        metadata:
+            labels:
+                app: httpapp
+        spec:
+            containers:
+                - image: http_app
+                  name: httpapp
+                  imagePullPolicy: Never
+                  ports:
+                      - containerPort: 9100

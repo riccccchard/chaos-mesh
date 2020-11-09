@@ -10,7 +10,9 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+/*
+	ipset为iptables的扩展，用于根据一系列规则屏蔽掉对应规则的ip
+ */
 package chaosdaemon
 
 import (
@@ -29,7 +31,7 @@ const (
 	ipExistErr           = "it's already added"
 	ipsetNewNameExistErr = "a set with the new name already exists"
 )
-
+//FlushIPSets可以将对应的container 的ipset设置为request ipset
 func (s *daemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (*empty.Empty, error) {
 	log.Info("flush ipset", "request", req)
 

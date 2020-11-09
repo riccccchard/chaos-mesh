@@ -46,6 +46,7 @@ func NewReconciler(e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
 }
 
 // Reconcile is twophase reconcile implement
+// kubebuilder所有的crd行为都由reconcile实现
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
@@ -60,7 +61,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
-
+	//在这里会获取每个chaos type的duraion，然后周期执行
 	duration, err := chaos.GetDuration()
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos duration")
@@ -79,7 +80,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	status := chaos.GetStatus()
-
+	//根据从controller拿到的status执行相应行为
+	//status.Experiment.Phase
 	if chaos.IsDeleted() {
 		// This chaos was deleted
 		r.Log.Info("Removing self")
@@ -95,7 +97,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else if chaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
-
+			//停止实验并recover chaos 对象
 			err = r.Recover(ctx, req, chaos)
 			if err != nil {
 				r.Log.Error(err, "failed to pause chaos")
@@ -166,7 +168,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{}, err
 		}
-
+		//applyAction将会执行我们重载的apply函数的逻辑
 		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
@@ -230,7 +232,8 @@ func applyAction(
 
 	// Start to apply action
 	r.Log.Info("Performing Action")
-
+	//reconciler.Apply执行这个chaos
+	//这个Apply就是我们重载的函数
 	if err := r.Apply(ctx, req, chaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos action")
 
